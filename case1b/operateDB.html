@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>JSP與Ajax</title>
+	<style type="text/css">
+		fieldset{border-width:3px;border-color:#f0f;}
+		legend,span,label{font-size:16px;}
+		legend{color:#00f;}
+		label{color:#f00;}
+	</style>
+	<script type="text/javascript">
+		var xmlHTTP,sqlS="",column=[];
+		function sendInfo(){
+			document.getElementById("result").innerHTML="";
+			var tags=document.getElementsByTagName("input"),cols="";
+			for (var i = 0; i < tags.length; i++) {
+				if (tags[i].name=="column") {
+					if (tags[i].checked) {
+						cols+=tags[i].value+",";
+						column.push(tags[i].value);
+					}
+				}
+			}
+			if(cols.length==0){
+				alert("請至少選擇一項欄位");
+				return false;
+			}else{
+				sqlS="select " + cols.replace(/.$/, '') + " from employee order by num";
+			}
+			document.getElementById("sqlString").value = sqlS;
+			
+			var url="operateDB.jsp?sqlS="+sqlS+"&"+"column="+column;
+			
+			if(window.XMLHttpRequest){
+				xmlHTTP=new XMLHttpRequest();
+			}else if(window.ActiveXObject){
+				xmlHTTP=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			
+			try{
+				xmlHTTP.onreadystatechange=getInfo;
+				xmlHTTP.open("GET",url,true);
+				xmlHTTP.send();
+			}catch(e){
+				alert("無法connect到server端");
+			}
+		}
+
+		function getInfo(){
+			//document.getElementById("result").innerHTML="";
+			if(xmlHTTP.readyState==4){
+				if(xmlHTTP.status == 200){
+					var val=xmlHTTP.responseText;
+					document.getElementById("result").innerHTML=val;
+				}
+			}
+		}
+		function reset1(){
+			//document.getElementById("result").innerText="";
+			document.location.href="http://localhost:8080/Demo/operateDB.html";
+		}
+</script>
+</head>
+<body>
+	<fieldset><legend>SQL查詢子句</legend>
+		<form name="selectForm" action="">
+		  <fieldset><legend>選擇顯示資料表的欄位  ( 資料庫的資料是依編號遞增排序的 )</legend>
+			<input type="checkbox" name="column" value="num">編號&emsp;
+			<input type="checkbox" name="column" value="name">姓名&emsp;
+			<input type="checkbox" name="column" value="sex">性別&emsp;
+			<input type="checkbox" name="column" value="age">年紀&emsp;
+			<input type="checkbox" name="column" value="birth">生日&emsp;
+			<input type="checkbox" name="column" value="address">地址<br>
+			<input type="button" value="傳送" onclick="sendInfo()">
+			<input type="button" value="重填" onclick="reset1()"><label>指令為：</label><input type="text" id="sqlString" size="70"></input>
+		  </fieldset>
+ 	  </form>
+	</fieldset>
+	<p><label>結果：</label><br><span id="result"></span></p>
+</body>
+</html>
